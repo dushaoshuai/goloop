@@ -1,12 +1,18 @@
 package goloop
 
+// I is the conventional iteration variable i.
 type I struct {
-	I     int
+	// I is the value of the iteration variable i.
+	I int
+	// Break breaks the loop.
+	// For now Break has no difference between each iteration.
 	Break func()
 }
 
 type iterator struct {
-	c         chan I
+	// c is used to communicate iteration values.
+	c chan I
+	// close breakChan to signal that it's time to break the loop.
 	breakChan chan struct{}
 }
 
@@ -25,8 +31,8 @@ func (i *iterator) breakFunc() {
 
 	close(i.breakChan)
 
-	// Empty the channel to not immediately return to the caller of breakFunc
-	// until the channel is closed. Prevent the caller receiving more iteration
+	// Empty channel i.c to not immediately return to the caller of breakFunc
+	// until i.c is closed. Prevent the caller from receiving more iteration
 	// values after called breakFunc.
 	for range i.c {
 	}
