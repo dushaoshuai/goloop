@@ -19,7 +19,7 @@ for i := 0; i < 10; i++ {
 }
 ```
 
-type goloop:
+Try goloop:
 
 ```go
 for i := range goloop.Repeat(10) {
@@ -34,6 +34,6 @@ for i := range goloop.RepeatWithBreak(10) {
 	fmt.Println(i.I)
 	if i.I == 5 {
 		i.Break()
-    }
+	}
 }
 ```
