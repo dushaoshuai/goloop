@@ -17,23 +17,21 @@ func TestMain(m *testing.M) {
 
 func TestRepeat(t *testing.T) {
 	for _, test := range []struct {
-		times  int
-		values []int
+		times int
+		want  []int
 	}{
-		{times: -1, values: nil},
-		{times: 0, values: nil},
-		{times: 1, values: []int{0}},
-		{times: 2, values: []int{0, 1}},
+		{times: -1, want: nil},
+		{times: 0, want: nil},
+		{times: 1, want: []int{0}},
+		{times: 2, want: []int{0, 1}},
 	} {
 		t.Run(fmt.Sprintf("%d times", test.times), func(t *testing.T) {
-			var i int
-			for i = range goloop.Repeat(test.times) {
-				if test.values[i] != i {
-					t.Errorf("Wrong iteration value, want %d, got %d", test.values[i], i)
-				}
+			var got []int
+			for i := range goloop.Repeat(test.times) {
+				got = append(got, i)
 			}
-			if test.times > 0 && len(test.values) != i+1 {
-				t.Errorf("Wrong iteration times, want %d, got %d", len(test.values), i+1)
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("Wrong iteration values produced by goloop.Repeat, want %v, got %v", test.want, got)
 			}
 		})
 	}
@@ -47,6 +45,48 @@ func ExampleRepeat() {
 	// Repeat 0
 	// Repeat 1
 	// Repeat 2
+}
+
+func TestRepeatWithBreak(t *testing.T) {
+	for _, test := range []struct {
+		times      int
+		breakpoint int
+		want       []int
+	}{
+		{times: -1, breakpoint: 0, want: nil},
+		{times: 0, breakpoint: 0, want: nil},
+		{times: 1, breakpoint: 0, want: []int{0}},
+		{times: 2, breakpoint: 1, want: []int{0, 1}},
+		{times: 2, breakpoint: 0, want: []int{0}},
+		{times: 3, breakpoint: 2, want: []int{0, 1, 2}},
+		{times: 3, breakpoint: 1, want: []int{0, 1}},
+	} {
+		t.Run(fmt.Sprintf("%d times", test.times), func(t *testing.T) {
+			var got []int
+			for i := range goloop.RepeatWithBreak(test.times) {
+				got = append(got, i.I)
+				if i.I == test.breakpoint {
+					i.Break()
+				}
+			}
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("Wrong iteration values produced by goloop.RepeatWithBreak, want %v, got %v", test.want, got)
+			}
+		})
+	}
+
+}
+
+func ExampleRepeatWithBreak() {
+	for i := range goloop.RepeatWithBreak(3) {
+		fmt.Println("Repeat", i.I)
+		if i.I == 1 {
+			i.Break()
+		}
+	}
+	// Output:
+	// Repeat 0
+	// Repeat 1
 }
 
 func TestRange(t *testing.T) {
