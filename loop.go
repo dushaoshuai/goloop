@@ -41,10 +41,14 @@ func RepeatWithBreak(times int) <-chan I {
 }
 
 // Range returns a channel for the client to iterate. Values sent on the channel
-// are start, start+step, start+2*step, ..., stop. If step is not specified, it
-// defaults to 1 or -1 as appropriate. If the specified step causes an infinite
-// loop, Range panics. As a special case, if start equals stop, the iteration
+// are start, start+step, start+2*step, ..., stop(only if stop equals start+n*step,
+// where n is an integer). As a special case, if start equals stop, the iteration
 // value produced is only start, no matter what the specified step is.
+//
+// If step is not specified, it defaults to 1 or -1 as appropriate.
+// If the specified step causes an infinite loop, Range panics.
+//
+// I's Break field can be called to break the loop.
 func Range(start, stop int, step ...int) <-chan I {
 	if start == stop {
 		return caseStartEqualsEnd(start)

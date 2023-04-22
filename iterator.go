@@ -5,7 +5,6 @@ type I struct {
 	// I is the value of the iteration variable i.
 	I int
 	// Break breaks the loop.
-	// For now Break has no difference between each iteration.
 	Break func()
 }
 
@@ -33,7 +32,7 @@ func (i *iterator) breakFunc() {
 
 	// Empty channel i.c to not immediately return to the caller of breakFunc
 	// until i.c is closed. Prevent the caller from receiving more iteration
-	// values after called breakFunc.
+	// values after calling breakFunc.
 	for range i.c {
 	}
 }
