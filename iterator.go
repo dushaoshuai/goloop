@@ -27,7 +27,7 @@ func (i *iterator) breakFunc() {
 
 	// Empty the channel to not immediately return to the caller of breakFunc
 	// until the channel is closed. Prevent the caller receiving more iteration
-	// want after called breakFunc.
+	// values after called breakFunc.
 	for range i.c {
 	}
 }
