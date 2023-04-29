@@ -19,7 +19,7 @@ for i := 0; i < 10; i++ {
 }
 ```
 
-Try goloop:
+try goloop:
 
 ```go
 for i := range goloop.Repeat(10) {
@@ -27,7 +27,7 @@ for i := range goloop.Repeat(10) {
 }
 ```
 
-If you want to break the loop when certain conditions are met:
+if you want to break the loop when certain conditions are met:
 
 ```go
 for i := range goloop.RepeatWithBreak(10) {

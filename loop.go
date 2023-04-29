@@ -7,9 +7,9 @@ import (
 )
 
 // Repeat returns a read-only channel. Clients can iterate through values received
-// on the returned channel to repeatedly doing something times times. No values
-// will be sent on the channel if times is not greater than 0. Values will be
-// sent in order and is in the range [0, times).
+// on the returned channel to repeatedly doing something times times.
+// Values will be sent in order and is in the half-open interval [0,times).
+// No values will be sent on the channel if times is less than or equal to 0.
 func Repeat(times int) <-chan int {
 	c := make(chan int)
 	go func() {
@@ -27,7 +27,7 @@ func Repeat(times int) <-chan int {
 //	for i := range RepeatWithBreak(50) {
 //		// Do something with i.I.
 //		// Break the for loop if certain conditions are met.
-//		if i == 30 {
+//		if i.I == 30 {
 //			i.Break()
 //		}
 //	}
@@ -40,15 +40,16 @@ func RepeatWithBreak(times int) <-chan I {
 	return rChan
 }
 
-// Range returns a channel for the client to iterate. Values sent on the channel
-// are start, start+step, start+2*step, ..., stop(only if stop equals start+n*step,
-// where n is an integer). As a special case, if start equals stop, the iteration
-// value produced is only start, no matter what the specified step is.
+// Range returns a read-only channel for the client to iterate. Values sent on
+// the channel are start, start+step, start+2*step, ... with stop excluded.
+// As a special case, if start equals stop, the iteration value produced is only
+// start, no matter what the specified step is.
 //
 // If step is not specified, it defaults to 1 or -1 as appropriate.
 // If the specified step causes an infinite loop, Range panics.
+// todo overflow
 //
-// I's Break field can be called to break the loop.
+// The returned channel's element is I, whose Break field can be called to break the loop.
 func Range(start, stop int, step ...int) <-chan I {
 	if start == stop {
 		return caseStartEqualsEnd(start)
