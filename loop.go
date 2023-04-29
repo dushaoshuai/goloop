@@ -2,10 +2,6 @@
 // It imitates Go's "for ... range ... {}" looping style.
 package goloop
 
-import (
-	"fmt"
-)
-
 // Repeat returns a read-only channel. Clients can iterate through values received
 // on the returned channel to repeatedly doing something times times.
 // Values will be sent in order and is in the half-open interval [0,times).
@@ -31,11 +27,11 @@ func Repeat(times int) <-chan int {
 //			i.Break()
 //		}
 //	}
-func RepeatWithBreak(times int) <-chan I {
-	rChan := Range(0, times-1)
+func RepeatWithBreak(times int) <-chan I[int] {
+	rChan := Range(0, times)
 	if times <= 0 {
 		i := <-rChan
-		i.Break()
+		i.Break() // todo check
 	}
 	return rChan
 }
@@ -45,44 +41,37 @@ func RepeatWithBreak(times int) <-chan I {
 // As a special case, if start equals stop, the iteration value produced is only
 // start, no matter what the specified step is.
 //
+// todo step uint64
 // If step is not specified, it defaults to 1 or -1 as appropriate.
-// If the specified step causes an infinite loop, Range panics.
 // todo overflow
 //
 // The returned channel's element is I, whose Break field can be called to break the loop.
-func Range(start, stop int, step ...int) <-chan I {
+func Range[T Integer](start, stop T, step ...uint64) <-chan I[T] {
 	if start == stop {
 		return caseStartEqualsEnd(start)
 	}
 
-	var incr int
+	// todo overflow
+
+	var incr T
 	if len(step) != 0 {
-		incr = step[0]
-		if (start < start+incr) != (start < stop) {
-			panic(fmt.Sprintf("goloop: infinite loop with start(%d)..stop(%d)..step(%d)", start, stop, incr))
-		}
+		incr = T(step[0]) // todo convert
 	} else {
-		if start < stop {
-			incr = 1
-		} else {
-			incr = -1
-		}
+		incr = 1
 	}
 
-	iter := newIterator()
+	iter := newIterator[T]()
 	go func() {
 		if start < stop {
-		L1:
-			for i := start; i <= stop; i += incr {
+			for i := start; i < stop; i += incr {
 				if breaked := iter.iter(i); breaked {
-					break L1
+					break
 				}
 			}
 		} else {
-		L2:
-			for i := start; i >= stop; i += incr {
+			for i := start; i > stop; i -= incr {
 				if breaked := iter.iter(i); breaked {
-					break L2
+					break
 				}
 			}
 		}
@@ -91,8 +80,8 @@ func Range(start, stop int, step ...int) <-chan I {
 	return iter.c
 }
 
-func caseStartEqualsEnd(start int) <-chan I {
-	iter := newIterator()
+func caseStartEqualsEnd[T Integer](start T) <-chan I[T] {
+	iter := newIterator[T]()
 	go func() {
 		iter.iter(start)
 		iter.finish()

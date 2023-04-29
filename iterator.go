@@ -1,28 +1,36 @@
 package goloop
 
+import (
+	"golang.org/x/exp/constraints"
+)
+
+type Integer interface {
+	constraints.Integer | byte
+}
+
 // I is the conventional iteration variable i.
-type I struct {
+type I[T Integer] struct {
 	// I is the value of the iteration variable i.
-	I int
+	I T
 	// Break breaks the loop.
 	Break func()
 }
 
-type iterator struct {
+type iterator[T Integer] struct {
 	// c is used to communicate iteration values.
-	c chan I
-	// close breakChan to signal that it's time to break the loop.
+	c chan I[T]
+	// Close breakChan to signal that it's time to break the loop.
 	breakChan chan struct{}
 }
 
-func newIterator() *iterator {
-	return &iterator{
-		c:         make(chan I),
+func newIterator[T Integer]() *iterator[T] {
+	return &iterator[T]{
+		c:         make(chan I[T]),
 		breakChan: make(chan struct{}),
 	}
 }
 
-func (i *iterator) breakFunc() {
+func (i *iterator[T]) breakFunc() {
 	// Allow breakFunc to be called multiple times.
 	defer func() {
 		recover()
@@ -37,15 +45,15 @@ func (i *iterator) breakFunc() {
 	}
 }
 
-func (i *iterator) finish() {
+func (i *iterator[T]) finish() {
 	close(i.c)
 }
 
-func (i *iterator) iter(iterValue int) (breaked bool) {
+func (i *iterator[T]) iter(value T) (breaked bool) {
 	select {
 	case <-i.breakChan:
 		return true
-	case i.c <- I{I: iterValue, Break: i.breakFunc}:
+	case i.c <- I[T]{I: value, Break: i.breakFunc}:
 		return false
 	}
 }
