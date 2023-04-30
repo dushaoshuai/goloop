@@ -3,10 +3,6 @@
 package goloop
 
 import (
-	"fmt"
-	"math"
-	"reflect"
-
 	"golang.org/x/exp/constraints"
 )
 
@@ -61,41 +57,6 @@ func Range[T constraints.Integer](start, stop T, step ...uint64) <-chan I[T] {
 
 	var incr T
 	if len(step) != 0 {
-		if step[0] == 0 {
-			panic("goloop: step is 0")
-		}
-		var (
-			kind         = reflect.TypeOf(incr).Kind()
-			panicStepErr = func(max uint64) {
-				if step[0] > max {
-					panic(fmt.Errorf("goloop: step(%d) exceeds the maximum %s value", step[0], kind))
-				}
-			}
-		)
-		switch kind {
-		case reflect.Int:
-			panicStepErr(math.MaxInt)
-		case reflect.Int8:
-			panicStepErr(math.MaxInt8)
-		case reflect.Int16:
-			panicStepErr(math.MaxInt16)
-		case reflect.Int32:
-			panicStepErr(math.MaxInt32)
-		case reflect.Int64:
-			panicStepErr(math.MaxInt64)
-		case reflect.Uint:
-			panicStepErr(math.MaxUint)
-		case reflect.Uint8:
-			panicStepErr(math.MaxUint8)
-		case reflect.Uint16:
-			panicStepErr(math.MaxUint16)
-		case reflect.Uint32:
-			panicStepErr(math.MaxUint32)
-		case reflect.Uint64:
-			panicStepErr(math.MaxUint64)
-		default:
-			panic(fmt.Errorf("goloop: unsupported types (%s)", kind))
-		}
 		incr = T(step[0])
 	} else {
 		incr = 1
