@@ -8,9 +8,6 @@ type I[T constraint] struct {
 	Break func()
 }
 
-type iterator interface {
-}
-
 type chanIter[T constraint] struct {
 	// c is used to communicate iteration values.
 	c chan I[T]
@@ -52,3 +49,5 @@ func (i *chanIter[T]) iter(value T) (breaked bool) {
 		return false
 	}
 }
+
+type sliceIter[T constraint] []T

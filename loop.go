@@ -96,3 +96,23 @@ func iterOnce[T constraint](value T) <-chan I[T] {
 	}()
 	return iter.c
 }
+
+// step == 0, panic
+func RangeSlice[T constraints.Integer](start, stop T, step ...uint64) []T {
+	var gen generator[T]
+	if start == stop {
+		gen = newIntGenOne(start)
+	} else {
+		if len(step) != 0 {
+			gen = newIntGen(start, stop, step[0])
+		} else {
+			gen = newIntGen(start, stop, 1)
+		}
+	}
+
+	var iter sliceIter[T]
+	for gen.next() {
+		iter = append(iter, gen.gen())
+	}
+	return iter
+}

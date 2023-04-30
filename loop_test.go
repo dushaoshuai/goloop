@@ -7,6 +7,7 @@ import (
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"go.uber.org/goleak"
+	"golang.org/x/exp/constraints"
 
 	"github.com/dushaoshuai/goloop"
 )
@@ -178,4 +179,70 @@ func TestRangeWithStep(t *testing.T) {
 			}
 		})
 	}
+}
+
+type testRange[T constraints.Integer] struct {
+	start, stop T
+	step        []uint64
+	want        []T
+	wantPanic   bool
+}
+
+func testRangeSliceHelper[T constraints.Integer](t *testing.T, tests []testRange[T]) {
+	t.Helper()
+
+	var (
+		foo  T
+		kind = reflect.TypeOf(foo).Kind()
+	)
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("%s-%d", kind, i), func(t *testing.T) {
+			defer func() {
+				e := recover()
+				if test.wantPanic && e == nil {
+					t.Errorf("test RangeSlice, want panic, didn't happen")
+				}
+				if !test.wantPanic && e != nil {
+					t.Errorf("test RangeSlice, unexpected panic")
+				}
+			}()
+
+			got := goloop.RangeSlice(test.start, test.stop, test.step...)
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("RangeSlice = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestRangeSlice(t *testing.T) {
+	testRangeSliceHelper(t, []testRange[int8]{
+		{1, 2, []uint64{0}, nil, true},
+		{0, 0, nil, []int8{0}, false},
+		{0, 0, []uint64{1}, []int8{0}, false},
+		{-2, 3, nil, []int8{-2, -1, 0, 1, 2}, false},
+		{5, -10, []uint64{3}, []int8{5, 2, -1, -4, -7}, false},
+	})
+	testRangeSliceHelper(t, []testRange[uint8]{
+		{1, 2, []uint64{0}, nil, true},
+		{0, 0, nil, []uint8{0}, false},
+		{0, 0, []uint64{1}, []uint8{0}, false},
+		{0, 5, nil, []uint8{0, 1, 2, 3, 4}, false},
+		{0, 5, []uint64{1}, []uint8{0, 1, 2, 3, 4}, false},
+		{3, 10, []uint64{4}, []uint8{3, 7}, false},
+	})
+	testRangeSliceHelper(t, []testRange[int]{
+		{1, 2, []uint64{0}, nil, true},
+		{0, 0, nil, []int{0}, false},
+		{0, 0, []uint64{1}, []int{0}, false},
+		{-2, 3, nil, []int{-2, -1, 0, 1, 2}, false},
+		{5, -10, []uint64{3}, []int{5, 2, -1, -4, -7}, false},
+	})
+	testRangeSliceHelper(t, []testRange[uint]{
+		{1, 2, []uint64{0}, nil, true},
+		{0, 0, nil, []uint{0}, false},
+		{0, 0, []uint64{1}, []uint{0}, false},
+		{0, 5, []uint64{1}, []uint{0, 1, 2, 3, 4}, false},
+		{3, 10, []uint64{4}, []uint{3, 7}, false},
+	})
 }
