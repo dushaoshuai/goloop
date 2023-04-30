@@ -2,6 +2,14 @@
 // It imitates Go's "for ... range ... {}" looping style.
 package goloop
 
+import (
+	"fmt"
+	"math"
+	"reflect"
+
+	"golang.org/x/exp/constraints"
+)
+
 // Repeat returns a read-only channel. Clients can iterate through values received
 // on the returned channel to repeatedly doing something times times.
 // Values will be sent in order and is in the half-open interval [0,times).
@@ -42,20 +50,53 @@ func RepeatWithBreak(times int) <-chan I[int] {
 // start, no matter what the specified step is.
 //
 // todo step uint64
-// If step is not specified, it defaults to 1 or -1 as appropriate.
+// If step is not specified, it defaults to 1.
 // todo overflow
 //
 // The returned channel's element is I, whose Break field can be called to break the loop.
-func Range[T Integer](start, stop T, step ...uint64) <-chan I[T] {
+func Range[T constraints.Integer](start, stop T, step ...uint64) <-chan I[T] {
 	if start == stop {
-		return caseStartEqualsEnd(start)
+		return iterOnce(start)
 	}
-
-	// todo overflow
 
 	var incr T
 	if len(step) != 0 {
-		incr = T(step[0]) // todo convert
+		if step[0] == 0 {
+			panic("goloop: step is 0")
+		}
+		var (
+			kind         = reflect.TypeOf(incr).Kind()
+			panicStepErr = func(max uint64) {
+				if step[0] > max {
+					panic(fmt.Errorf("goloop: step(%d) exceeds the maximum %s value", step[0], kind))
+				}
+			}
+		)
+		switch kind {
+		case reflect.Int:
+			panicStepErr(math.MaxInt)
+		case reflect.Int8:
+			panicStepErr(math.MaxInt8)
+		case reflect.Int16:
+			panicStepErr(math.MaxInt16)
+		case reflect.Int32:
+			panicStepErr(math.MaxInt32)
+		case reflect.Int64:
+			panicStepErr(math.MaxInt64)
+		case reflect.Uint:
+			panicStepErr(math.MaxUint)
+		case reflect.Uint8:
+			panicStepErr(math.MaxUint8)
+		case reflect.Uint16:
+			panicStepErr(math.MaxUint16)
+		case reflect.Uint32:
+			panicStepErr(math.MaxUint32)
+		case reflect.Uint64:
+			panicStepErr(math.MaxUint64)
+		default:
+			panic(fmt.Errorf("goloop: unsupported types (%s)", kind))
+		}
+		incr = T(step[0])
 	} else {
 		incr = 1
 	}
@@ -67,10 +108,16 @@ func Range[T Integer](start, stop T, step ...uint64) <-chan I[T] {
 				if breaked := iter.iter(i); breaked {
 					break
 				}
+				if i+incr < i { // overflow
+					break
+				}
 			}
 		} else {
 			for i := start; i > stop; i -= incr {
 				if breaked := iter.iter(i); breaked {
+					break
+				}
+				if i-incr > i { // overflow
 					break
 				}
 			}
@@ -80,10 +127,10 @@ func Range[T Integer](start, stop T, step ...uint64) <-chan I[T] {
 	return iter.c
 }
 
-func caseStartEqualsEnd[T Integer](start T) <-chan I[T] {
+func iterOnce[T constraint](value T) <-chan I[T] {
 	iter := newIterator[T]()
 	go func() {
-		iter.iter(start)
+		iter.iter(value)
 		iter.finish()
 	}()
 	return iter.c

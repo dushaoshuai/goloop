@@ -4,26 +4,26 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type Integer interface {
-	constraints.Integer | byte
+type constraint interface {
+	constraints.Integer
 }
 
 // I is the conventional iteration variable i.
-type I[T Integer] struct {
+type I[T constraint] struct {
 	// I is the value of the iteration variable i.
 	I T
 	// Break breaks the loop.
 	Break func()
 }
 
-type iterator[T Integer] struct {
+type iterator[T constraint] struct {
 	// c is used to communicate iteration values.
 	c chan I[T]
 	// Close breakChan to signal that it's time to break the loop.
 	breakChan chan struct{}
 }
 
-func newIterator[T Integer]() *iterator[T] {
+func newIterator[T constraint]() *iterator[T] {
 	return &iterator[T]{
 		c:         make(chan I[T]),
 		breakChan: make(chan struct{}),

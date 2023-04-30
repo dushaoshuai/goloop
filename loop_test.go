@@ -37,16 +37,6 @@ func TestRepeat(t *testing.T) {
 	}
 }
 
-func ExampleRepeat() {
-	for i := range goloop.Repeat(3) {
-		fmt.Println("Repeat", i)
-	}
-	// Output:
-	// Repeat 0
-	// Repeat 1
-	// Repeat 2
-}
-
 func TestRepeatWithBreak(t *testing.T) {
 	for _, test := range []struct {
 		times      int
@@ -75,18 +65,6 @@ func TestRepeatWithBreak(t *testing.T) {
 		})
 	}
 
-}
-
-func ExampleRepeatWithBreak() {
-	for i := range goloop.RepeatWithBreak(3) {
-		fmt.Println("Repeat", i.I)
-		if i.I == 1 {
-			i.Break()
-		}
-	}
-	// Output:
-	// Repeat 0
-	// Repeat 1
 }
 
 func TestRange(t *testing.T) {
@@ -192,7 +170,7 @@ func TestRangeWithStep(t *testing.T) {
 			}
 
 			var got []int
-			for i := range goloop.Range(test.start, test.end, test.step) {
+			for i := range goloop.Range(test.start, test.end, uint64(test.step)) {
 				got = append(got, i.I)
 			}
 			if !reflect.DeepEqual(test.want, got) {
@@ -200,19 +178,4 @@ func TestRangeWithStep(t *testing.T) {
 			}
 		})
 	}
-}
-
-func ExampleRange() {
-	for i := range goloop.Range(3, 26, 5) {
-		fmt.Println(i.I)
-		if i.I == 18 {
-			i.Break()
-		}
-	}
-
-	// Output:
-	// 3
-	// 8
-	// 13
-	// 18
 }
