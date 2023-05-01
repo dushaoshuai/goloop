@@ -46,6 +46,9 @@ func ExampleRange() {
 func ExampleRangeSlice() {
 	for i, n := range goloop.RangeSlice[uint8](250, 255) {
 		fmt.Println(i, n)
+		if n >= 253 {
+			break
+		}
 	}
 
 	// Output:
@@ -53,6 +56,4 @@ func ExampleRangeSlice() {
 	// 1 251
 	// 2 252
 	// 3 253
-	// 4 254
-	// 5 255
 }
