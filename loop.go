@@ -45,7 +45,8 @@ func RepeatWithBreak(times int) <-chan I[int] {
 // s[i] = start + step*i where s[i] is less than or equal to stop.
 // If start is greater than stop, the generated values are determined by the formula
 // s[i] = start - step*i where s[i] is greater than or equal to stop.
-// If start is equal to stop, the only generated value is start(stop).
+// If start is equal to stop, the only generated value is start(stop),
+// no matter what the specified step is.
 //
 // If not specified, step is 1 by default. If specified, step must be greater than 0,
 // otherwise Range will panic. There is one exception: if start equals stop,
@@ -84,7 +85,8 @@ func Range[T constraints.Integer](start, stop T, step ...T) <-chan I[T] {
 // s[i] = start + step*i where s[i] is less than or equal to stop.
 // If start is greater than stop, the generated values are determined by the formula
 // s[i] = start - step*i where s[i] is greater than or equal to stop.
-// If start is equal to stop, the only generated value is start(stop).
+// If start is equal to stop, the only generated value is start(stop),
+// no matter what the specified step is.
 //
 // If not specified, step is 1 by default. If specified, step must be greater than 0,
 // otherwise RangeSlice will panic. There is one exception: if start equals stop,
