@@ -17,7 +17,7 @@ func Repeat(times int) <-chan int {
 }
 
 // RepeatWithBreak is almost the same as Repeat, except that the returned channel's
-// element is I, whose Break field can be called to terminate communication:
+// element is I, whose Break field can be called to break the loop:
 //
 //	for i := range RepeatWithBreak(50) {
 //		// Do something with i.I.
@@ -49,7 +49,7 @@ func RepeatWithBreak(times int) <-chan I[int] {
 // otherwise Range will panic. There is one exception: if start equals stop,
 // instead of panicking, Range generates one value: start(stop).
 //
-// The returned channel's element is I, whose Break field can be called to terminate communication.
+// The returned channel's element is I, whose Break field can be called to break the loop.
 func Range[T Integer](start, stop T, step ...T) <-chan I[T] {
 	var gen generator[T]
 	if start == stop {

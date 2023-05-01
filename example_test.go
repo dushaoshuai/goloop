@@ -29,18 +29,19 @@ func ExampleRepeatWithBreak() {
 }
 
 func ExampleRange() {
-	for i := range goloop.Range(3, 26, 5) {
+	for i := range goloop.Range[int8](13, -15, 5) {
 		fmt.Println(i.I)
-		if i.I >= 18 {
+		if i.I <= -7 {
 			i.Break()
 		}
 	}
 
 	// Output:
-	// 3
-	// 8
 	// 13
-	// 18
+	// 8
+	// 3
+	// -2
+	// -7
 }
 
 func ExampleRangeSlice() {
