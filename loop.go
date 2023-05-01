@@ -21,7 +21,7 @@ func Repeat(times int) <-chan int {
 }
 
 // RepeatWithBreak is almost the same as Repeat, except that the returned channel's
-// element is I, whose Break field can be called to break the loop:
+// element is I, whose Break field can be called to terminate communication:
 //
 //	for i := range RepeatWithBreak(50) {
 //		// Do something with i.I.
@@ -31,12 +31,13 @@ func Repeat(times int) <-chan int {
 //		}
 //	}
 func RepeatWithBreak(times int) <-chan I[int] {
-	rChan := Range(0, times)
 	if times <= 0 {
-		i := <-rChan
-		i.Break() // todo check
+		c := make(chan I[int])
+		close(c)
+		return c
+	} else {
+		return Range(0, times-1)
 	}
-	return rChan
 }
 
 // Range generates a sequence of integers and send them on the returned channel.

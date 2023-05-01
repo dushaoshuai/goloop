@@ -51,6 +51,8 @@ func TestRepeatWithBreak(t *testing.T) {
 		{times: 2, breakpoint: 0, want: []int{0}},
 		{times: 3, breakpoint: 2, want: []int{0, 1, 2}},
 		{times: 3, breakpoint: 1, want: []int{0, 1}},
+		{times: 3, breakpoint: 3, want: []int{0, 1, 2}},
+		{times: 3, breakpoint: 4, want: []int{0, 1, 2}},
 	} {
 		t.Run(fmt.Sprintf("%d times", test.times), func(t *testing.T) {
 			var got []int
@@ -61,7 +63,7 @@ func TestRepeatWithBreak(t *testing.T) {
 				}
 			}
 			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("Wrong iteration values produced by goloop.RepeatWithBreak, want %v, got %v", test.want, got)
+				t.Errorf("RepeatWithBreak generates %v, want %v", got, test.want)
 			}
 		})
 	}
