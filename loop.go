@@ -114,11 +114,13 @@ func RangeSlice[T constraints.Integer](start, stop T, step ...uint64) (s []T) {
 	if start == stop {
 		gen = newIntGenOne(start)
 	} else {
+		var incr uint64
 		if len(step) != 0 {
-			gen = newIntGen(start, stop, step[0])
+			incr = step[0]
 		} else {
-			gen = newIntGen(start, stop, 1)
+			incr = 1
 		}
+		gen = newIntGen(start, stop, incr)
 	}
 
 	var iter sliceIter[T]
