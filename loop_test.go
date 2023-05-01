@@ -183,7 +183,7 @@ func TestRangeWithStep(t *testing.T) {
 
 type testRange[T constraints.Integer] struct {
 	start, stop T
-	step        []uint64
+	step        []T
 	want        []T
 	wantPanic   bool
 }
@@ -217,32 +217,34 @@ func testRangeSliceHelper[T constraints.Integer](t *testing.T, tests []testRange
 
 func TestRangeSlice(t *testing.T) {
 	testRangeSliceHelper(t, []testRange[int8]{
-		{1, 2, []uint64{0}, nil, true},
+		{1, 2, []int8{0}, nil, true},
+		{1, 2, []int8{-1}, nil, true},
 		{0, 0, nil, []int8{0}, false},
-		{0, 0, []uint64{1}, []int8{0}, false},
-		{-2, 3, nil, []int8{-2, -1, 0, 1, 2}, false},
-		{5, -10, []uint64{3}, []int8{5, 2, -1, -4, -7}, false},
+		{0, 0, []int8{1}, []int8{0}, false},
+		{-2, 3, nil, []int8{-2, -1, 0, 1, 2, 3}, false},
+		{5, -9, []int8{3}, []int8{5, 2, -1, -4, -7}, false},
 	})
 	testRangeSliceHelper(t, []testRange[uint8]{
-		{1, 2, []uint64{0}, nil, true},
+		{1, 2, []uint8{0}, nil, true},
 		{0, 0, nil, []uint8{0}, false},
-		{0, 0, []uint64{1}, []uint8{0}, false},
-		{0, 5, nil, []uint8{0, 1, 2, 3, 4}, false},
-		{0, 5, []uint64{1}, []uint8{0, 1, 2, 3, 4}, false},
-		{3, 10, []uint64{4}, []uint8{3, 7}, false},
+		{0, 0, []uint8{1}, []uint8{0}, false},
+		{0, 5, nil, []uint8{0, 1, 2, 3, 4, 5}, false},
+		{0, 5, []uint8{1}, []uint8{0, 1, 2, 3, 4, 5}, false},
+		{3, 10, []uint8{4}, []uint8{3, 7}, false},
 	})
 	testRangeSliceHelper(t, []testRange[int]{
-		{1, 2, []uint64{0}, nil, true},
+		{1, 2, []int{0}, nil, true},
+		{1, 2, []int{-1}, nil, true},
 		{0, 0, nil, []int{0}, false},
-		{0, 0, []uint64{1}, []int{0}, false},
-		{-2, 3, nil, []int{-2, -1, 0, 1, 2}, false},
-		{5, -10, []uint64{3}, []int{5, 2, -1, -4, -7}, false},
+		{0, 0, []int{1}, []int{0}, false},
+		{-2, 3, nil, []int{-2, -1, 0, 1, 2, 3}, false},
+		{5, -9, []int{3}, []int{5, 2, -1, -4, -7}, false},
 	})
 	testRangeSliceHelper(t, []testRange[uint]{
-		{1, 2, []uint64{0}, nil, true},
+		{1, 2, []uint{0}, nil, true},
 		{0, 0, nil, []uint{0}, false},
-		{0, 0, []uint64{1}, []uint{0}, false},
-		{0, 5, []uint64{1}, []uint{0, 1, 2, 3, 4}, false},
-		{3, 10, []uint64{4}, []uint{3, 7}, false},
+		{0, 0, []uint{1}, []uint{0}, false},
+		{0, 5, []uint{1}, []uint{0, 1, 2, 3, 4, 5}, false},
+		{3, 10, []uint{4}, []uint{3, 7}, false},
 	})
 }

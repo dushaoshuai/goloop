@@ -9,10 +9,9 @@ import (
 )
 
 type intGenTest[T constraints.Integer] struct {
-	start, stop T
-	step        uint64
-	want        []T
-	wantPanic   bool
+	start, stop, step T
+	want              []T
+	wantPanic         bool
 }
 
 func testIntGenHelper[T constraints.Integer](t *testing.T, tests []intGenTest[T]) {
@@ -54,36 +53,36 @@ func TestIntGen(t *testing.T) {
 	testIntGenHelper(t, []intGenTest[int8]{
 		{0, 0, 1, nil, true},
 		{0, 1, 0, nil, true},
-		{0, 1, 128, nil, true},
-		{-3, 3, 1, []int8{-3, -2, -1, 0, 1, 2}, false},
-		{-3, 3, 2, []int8{-3, -1, 1}, false},
-		{-3, 3, 3, []int8{-3, 0}, false},
-		{4, -2, 1, []int8{4, 3, 2, 1, 0, -1}, false},
-		{4, -2, 2, []int8{4, 2, 0}, false},
-		{4, -2, 3, []int8{4, 1}, false},
-		{120, 127, 1, []int8{120, 121, 122, 123, 124, 125, 126}, false},
+		{0, 1, -1, nil, true},
+		{-3, 3, 1, []int8{-3, -2, -1, 0, 1, 2, 3}, false},
+		{-3, 3, 2, []int8{-3, -1, 1, 3}, false},
+		{-3, 3, 3, []int8{-3, 0, 3}, false},
+		{4, -2, 1, []int8{4, 3, 2, 1, 0, -1, -2}, false},
+		{4, -3, 2, []int8{4, 2, 0, -2}, false},
+		{4, -1, 3, []int8{4, 1}, false},
+		{120, 127, 1, []int8{120, 121, 122, 123, 124, 125, 126, 127}, false},
 		{120, 127, 3, []int8{120, 123, 126}, false},
-		{-120, -128, 1, []int8{-120, -121, -122, -123, -124, -125, -126, -127}, false},
+		{-120, -128, 1, []int8{-120, -121, -122, -123, -124, -125, -126, -127, -128}, false},
 		{-120, -128, 3, []int8{-120, -123, -126}, false},
 	})
 	testIntGenHelper(t, []intGenTest[uint8]{
 		{0, 0, 1, nil, true},
 		{4, 4, 1, nil, true},
 		{1, 4, 0, nil, true},
-		{0, 255, 256, nil, true},
-		{0, 5, 1, []uint8{0, 1, 2, 3, 4}, false},
+		{0, 5, 1, []uint8{0, 1, 2, 3, 4, 5}, false},
 		{0, 5, 2, []uint8{0, 2, 4}, false},
-		{1, 5, 1, []uint8{1, 2, 3, 4}, false},
+		{1, 5, 1, []uint8{1, 2, 3, 4, 5}, false},
 		{1, 5, 3, []uint8{1, 4}, false},
-		{250, 255, 1, []uint8{250, 251, 252, 253, 254}, false},
+		{250, 255, 1, []uint8{250, 251, 252, 253, 254, 255}, false},
 		{250, 255, 2, []uint8{250, 252, 254}, false},
 		{250, 255, 3, []uint8{250, 253}, false},
 	})
 	testIntGenHelper(t, []intGenTest[int]{
 		{-4, -4, 1, nil, true},
 		{1, 4, 0, nil, true},
-		{-1, 3, 1, []int{-1, 0, 1, 2}, false},
-		{2, -3, 1, []int{2, 1, 0, -1, -2}, false},
+		{1, 4, -1, nil, true},
+		{-1, 3, 1, []int{-1, 0, 1, 2, 3}, false},
+		{2, -3, 1, []int{2, 1, 0, -1, -2, -3}, false},
 	})
 	testIntGenHelper(t, []intGenTest[uint]{
 		{0, 0, 1, nil, true},

@@ -105,16 +105,15 @@ func iterOnce[T constraint](value T) <-chan I[T] {
 // s[i] = start - step*i where s[i] is greater than or equal to stop.
 // If start is equal to stop, the only generated value is start(stop).
 //
-// todo step > 0
-//
-// RangeSlice panics if the specified step is 0, with one exception:
-// if start equals stop, RangeSlice does not panic and generates one value: start(stop).
-func RangeSlice[T constraints.Integer](start, stop T, step ...uint64) (s []T) {
+// If not specified, step is 1 by default. If specified, step must be greater than 0,
+// otherwise RangeSlice will panic. There is one exception: if start equals stop,
+// RangeSlice does not panic and generates one value: start(stop).
+func RangeSlice[T constraints.Integer](start, stop T, step ...T) (s []T) {
 	var gen generator[T]
 	if start == stop {
 		gen = newIntGenOne(start)
 	} else {
-		var incr uint64
+		var incr T
 		if len(step) != 0 {
 			incr = step[0]
 		} else {
