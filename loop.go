@@ -1,5 +1,4 @@
 // Package goloop tries to facilitate looping in Go.
-// It imitates Go's "for ... range ... {}" looping style.
 package goloop
 
 import (
