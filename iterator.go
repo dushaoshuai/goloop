@@ -15,7 +15,7 @@ type chanIter[T constraint] struct {
 	breakChan chan struct{}
 }
 
-func newIterator[T constraint]() *chanIter[T] {
+func newChanIter[T constraint]() *chanIter[T] {
 	return &chanIter[T]{
 		c:         make(chan I[T]),
 		breakChan: make(chan struct{}),

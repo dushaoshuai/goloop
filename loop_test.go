@@ -171,7 +171,7 @@ func TestRangeWithStep(t *testing.T) {
 			}
 
 			var got []int
-			for i := range goloop.Range(test.start, test.end, uint64(test.step)) {
+			for i := range goloop.Range(test.start, test.end, test.step) {
 				got = append(got, i.I)
 			}
 			if !reflect.DeepEqual(test.want, got) {

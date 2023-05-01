@@ -40,58 +40,40 @@ func RepeatWithBreak(times int) <-chan I[int] {
 	return rChan
 }
 
-// Range returns a read-only channel for the client to iterate. Values sent on
-// the channel are start, start+step, start+2*step, ... with stop excluded.
-// As a special case, if start equals stop, the iteration value produced is only
-// start, no matter what the specified step is.
+// Range generates a sequence of integers and send them on the returned channel.
 //
-// todo step uint64
-// If step is not specified, it defaults to 1.
-// todo overflow
+// If start is less than stop, the generated values are determined by the formula
+// s[i] = start + step*i where s[i] is less than or equal to stop.
+// If start is greater than stop, the generated values are determined by the formula
+// s[i] = start - step*i where s[i] is greater than or equal to stop.
+// If start is equal to stop, the only generated value is start(stop).
 //
-// The returned channel's element is I, whose Break field can be called to break the loop.
-func Range[T constraints.Integer](start, stop T, step ...uint64) <-chan I[T] {
+// If not specified, step is 1 by default. If specified, step must be greater than 0,
+// otherwise Range will panic. There is one exception: if start equals stop,
+// Range does not panic and generates one value: start(stop).
+//
+// The returned channel's element is I, whose Break field can be called to terminate communication.
+func Range[T constraints.Integer](start, stop T, step ...T) <-chan I[T] {
+	var gen generator[T]
 	if start == stop {
-		return iterOnce(start)
-	}
-
-	var incr T
-	if len(step) != 0 {
-		incr = T(step[0])
+		gen = newIntGenOne(start)
 	} else {
-		incr = 1
+		var incr T
+		if len(step) != 0 {
+			incr = step[0]
+		} else {
+			incr = 1
+		}
+		gen = newIntGen(start, stop, incr)
 	}
 
-	iter := newIterator[T]()
+	iter := newChanIter[T]()
 	go func() {
-		if start < stop {
-			for i := start; i < stop; i += incr {
-				if breaked := iter.iter(i); breaked {
-					break
-				}
-				if i+incr < i { // overflow
-					break
-				}
-			}
-		} else {
-			for i := start; i > stop; i -= incr {
-				if breaked := iter.iter(i); breaked {
-					break
-				}
-				if i-incr > i { // overflow
-					break
-				}
+		for gen.next() {
+			if breaked := iter.iter(gen.gen()); breaked {
+				break
 			}
 		}
-		iter.finish()
-	}()
-	return iter.c
-}
-
-func iterOnce[T constraint](value T) <-chan I[T] {
-	iter := newIterator[T]()
-	go func() {
-		iter.iter(value)
 		iter.finish()
 	}()
 	return iter.c
