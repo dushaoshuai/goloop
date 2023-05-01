@@ -1,7 +1,6 @@
 # goloop
 
 goloop tries to facilitate looping in Go.
-It imitates Go's "for ... range ... {}" looping style.
 
 # Download/Install
 
@@ -11,7 +10,7 @@ go get -u github.com/dushaoshuai/goloop
 
 # Quick Start
 
-If you are tired of writing this trivial code:
+Replace this trivial code:
 
 ```go
 for i := 0; i < 10; i++ {
@@ -19,7 +18,7 @@ for i := 0; i < 10; i++ {
 }
 ```
 
-Try goloop:
+with:
 
 ```go
 for i := range goloop.Repeat(10) {
@@ -27,13 +26,35 @@ for i := range goloop.Repeat(10) {
 }
 ```
 
-If you want to break the loop when certain conditions are met:
+Break the loop when certain conditions are met:
 
 ```go
 for i := range goloop.RepeatWithBreak(10) {
 	fmt.Println(i.I)
 	if i.I == 5 {
 		i.Break()
+	}
+}
+```
+
+Range over a sequence of integers:
+
+```go
+for i := range goloop.Range(3, 26, 5) {
+    fmt.Println(i.I)
+    if i.I >= 18 {
+        i.Break()
+    }
+}
+```
+
+Range over a sequence of integers from a slice:
+
+```go
+for i, n := range goloop.RangeSlice[uint8](250, 255) {
+	fmt.Println(i, n)
+	if n >= 253 {
+		break
 	}
 }
 ```

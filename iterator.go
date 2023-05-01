@@ -1,28 +1,30 @@
 package goloop
 
 // I is the conventional iteration variable i.
-type I struct {
+type I[T constraint] struct {
 	// I is the value of the iteration variable i.
-	I int
+	I T
 	// Break breaks the loop.
+	// NOTE: Break cannot act entirely the same as the break statement.
+	// It cancels subsequent iterations, but not the current iteration.
 	Break func()
 }
 
-type iterator struct {
+type chanIter[T constraint] struct {
 	// c is used to communicate iteration values.
-	c chan I
-	// close breakChan to signal that it's time to break the loop.
+	c chan I[T]
+	// Close breakChan to signal that it's time to break the loop.
 	breakChan chan struct{}
 }
 
-func newIterator() *iterator {
-	return &iterator{
-		c:         make(chan I),
+func newChanIter[T constraint]() *chanIter[T] {
+	return &chanIter[T]{
+		c:         make(chan I[T]),
 		breakChan: make(chan struct{}),
 	}
 }
 
-func (i *iterator) breakFunc() {
+func (i *chanIter[T]) breakFunc() {
 	// Allow breakFunc to be called multiple times.
 	defer func() {
 		recover()
@@ -37,15 +39,17 @@ func (i *iterator) breakFunc() {
 	}
 }
 
-func (i *iterator) finish() {
+func (i *chanIter[T]) finish() {
 	close(i.c)
 }
 
-func (i *iterator) iter(iterValue int) (breaked bool) {
+func (i *chanIter[T]) iter(value T) (breaked bool) {
 	select {
 	case <-i.breakChan:
 		return true
-	case i.c <- I{I: iterValue, Break: i.breakFunc}:
+	case i.c <- I[T]{I: value, Break: i.breakFunc}:
 		return false
 	}
 }
+
+type sliceIter[T constraint] []T

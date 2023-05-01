@@ -1,15 +1,10 @@
 // Package goloop tries to facilitate looping in Go.
-// It imitates Go's "for ... range ... {}" looping style.
 package goloop
 
-import (
-	"fmt"
-)
-
-// Repeat returns a read-only channel. Clients can iterate through values received
-// on the returned channel to repeatedly doing something times times. No values
-// will be sent on the channel if times is not greater than 0. Values will be
-// sent in order and is in the range [0, times).
+// Repeat is intended to facilitate repeatedly doing something times times.
+// Repeat generates a sequence of ints and send them on the returned channel.
+// Values will be sent in order and are in the half-open interval [0,times).
+// No values will be sent if times is less than or equal to 0.
 func Repeat(times int) <-chan int {
 	c := make(chan int)
 	go func() {
@@ -22,67 +17,58 @@ func Repeat(times int) <-chan int {
 }
 
 // RepeatWithBreak is almost the same as Repeat, except that the returned channel's
-// element is I, whose Break field can be called to break the loop:
+// element is I, whose Break field can be called to terminate communication:
 //
 //	for i := range RepeatWithBreak(50) {
 //		// Do something with i.I.
 //		// Break the for loop if certain conditions are met.
-//		if i == 30 {
+//		if i.I == 30 {
 //			i.Break()
 //		}
 //	}
-func RepeatWithBreak(times int) <-chan I {
-	rChan := Range(0, times-1)
+func RepeatWithBreak(times int) <-chan I[int] {
 	if times <= 0 {
-		i := <-rChan
-		i.Break()
-	}
-	return rChan
-}
-
-// Range returns a channel for the client to iterate. Values sent on the channel
-// are start, start+step, start+2*step, ..., stop(only if stop equals start+n*step,
-// where n is an integer). As a special case, if start equals stop, the iteration
-// value produced is only start, no matter what the specified step is.
-//
-// If step is not specified, it defaults to 1 or -1 as appropriate.
-// If the specified step causes an infinite loop, Range panics.
-//
-// I's Break field can be called to break the loop.
-func Range(start, stop int, step ...int) <-chan I {
-	if start == stop {
-		return caseStartEqualsEnd(start)
-	}
-
-	var incr int
-	if len(step) != 0 {
-		incr = step[0]
-		if (start < start+incr) != (start < stop) {
-			panic(fmt.Sprintf("goloop: infinite loop with start(%d)..stop(%d)..step(%d)", start, stop, incr))
-		}
+		c := make(chan I[int])
+		close(c)
+		return c
 	} else {
-		if start < stop {
-			incr = 1
+		return Range(0, times-1)
+	}
+}
+
+// Range generates a sequence of integers and send them on the returned channel.
+//
+// If start is less than stop, the generated values are determined by the formula
+// s[i] = start + step*i where s[i] is less than or equal to stop.
+// If start is greater than stop, the generated values are determined by the formula
+// s[i] = start - step*i where s[i] is greater than or equal to stop.
+// If start is equal to stop, the only generated value is start(stop),
+// no matter what the specified step is.
+//
+// If not specified, step is 1 by default. If specified, step must be greater than 0,
+// otherwise Range will panic. There is one exception: if start equals stop,
+// Range does not panic and generates one value: start(stop).
+//
+// The returned channel's element is I, whose Break field can be called to terminate communication.
+func Range[T Integer](start, stop T, step ...T) <-chan I[T] {
+	var gen generator[T]
+	if start == stop {
+		gen = newIntGenOne(start)
+	} else {
+		var incr T
+		if len(step) != 0 {
+			incr = step[0]
 		} else {
-			incr = -1
+			incr = 1
 		}
+		gen = newIntGen(start, stop, incr)
 	}
 
-	iter := newIterator()
+	iter := newChanIter[T]()
 	go func() {
-		if start < stop {
-		L1:
-			for i := start; i <= stop; i += incr {
-				if breaked := iter.iter(i); breaked {
-					break L1
-				}
-			}
-		} else {
-		L2:
-			for i := start; i >= stop; i += incr {
-				if breaked := iter.iter(i); breaked {
-					break L2
-				}
+		for gen.next() {
+			if breaked := iter.iter(gen.gen()); breaked {
+				break
 			}
 		}
 		iter.finish()
@@ -90,11 +76,35 @@ func Range(start, stop int, step ...int) <-chan I {
 	return iter.c
 }
 
-func caseStartEqualsEnd(start int) <-chan I {
-	iter := newIterator()
-	go func() {
-		iter.iter(start)
-		iter.finish()
-	}()
-	return iter.c
+// RangeSlice generates a sequence of integers and put them in the returned slice.
+//
+// If start is less than stop, the generated values are determined by the formula
+// s[i] = start + step*i where s[i] is less than or equal to stop.
+// If start is greater than stop, the generated values are determined by the formula
+// s[i] = start - step*i where s[i] is greater than or equal to stop.
+// If start is equal to stop, the only generated value is start(stop),
+// no matter what the specified step is.
+//
+// If not specified, step is 1 by default. If specified, step must be greater than 0,
+// otherwise RangeSlice will panic. There is one exception: if start equals stop,
+// RangeSlice does not panic and generates one value: start(stop).
+func RangeSlice[T Integer](start, stop T, step ...T) (s []T) {
+	var gen generator[T]
+	if start == stop {
+		gen = newIntGenOne(start)
+	} else {
+		var incr T
+		if len(step) != 0 {
+			incr = step[0]
+		} else {
+			incr = 1
+		}
+		gen = newIntGen(start, stop, incr)
+	}
+
+	var iter sliceIter[T]
+	for gen.next() {
+		iter = append(iter, gen.gen())
+	}
+	return iter
 }
