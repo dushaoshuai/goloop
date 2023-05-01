@@ -31,7 +31,7 @@ func ExampleRepeatWithBreak() {
 func ExampleRange() {
 	for i := range goloop.Range(3, 26, 5) {
 		fmt.Println(i.I)
-		if i.I == 18 {
+		if i.I >= 18 {
 			i.Break()
 		}
 	}
