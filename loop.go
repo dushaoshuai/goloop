@@ -5,10 +5,10 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-// Repeat returns a read-only channel. Clients can iterate through values received
-// on the returned channel to repeatedly doing something times times.
+// Repeat is intended to facilitate repeatedly doing something times times.
+// Repeat generates a sequence of ints and send them on the returned channel.
 // Values will be sent in order and is in the half-open interval [0,times).
-// No values will be sent on the channel if times is less than or equal to 0.
+// No values will be sent if times is less than or equal to 0.
 func Repeat(times int) <-chan int {
 	c := make(chan int)
 	go func() {
