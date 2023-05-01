@@ -6,7 +6,7 @@ type I[T constraint] struct {
 	I T
 	// Break breaks the loop.
 	// NOTE: Break cannot act entirely the same as the break statement.
-	// It stops subsequent iterations, but not the current iteration.
+	// It cancels subsequent iterations, but not the current iteration.
 	Break func()
 }
 
