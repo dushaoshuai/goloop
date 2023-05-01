@@ -1,5 +1,7 @@
 # goloop
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/dushaoshuai/goloop.svg)](https://pkg.go.dev/github.com/dushaoshuai/goloop)
+
 goloop tries to facilitate looping in Go.
 
 # Download/Install
