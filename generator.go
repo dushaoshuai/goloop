@@ -4,9 +4,9 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-// all types this package supported
+// all types supported by this package
 type constraint interface {
-	constraints.Integer
+	Integer
 }
 
 type generator[T constraint] interface {
@@ -17,6 +17,10 @@ type generator[T constraint] interface {
 	gen() T
 }
 
+type Integer interface {
+	constraints.Integer | ~byte | ~rune
+}
+
 type intGen[T constraints.Integer] struct {
 	started bool
 	start   T // start must not be equal to stop
@@ -25,7 +29,7 @@ type intGen[T constraints.Integer] struct {
 	curr    T
 }
 
-func newIntGen[T constraints.Integer](start, stop, step T) *intGen[T] {
+func newIntGen[T Integer](start, stop, step T) *intGen[T] {
 	if start == stop {
 		panic("goloop: intGen: use intGenOne instead if start is equal to stop")
 	}
@@ -71,7 +75,7 @@ func (g *intGen[T]) gen() T {
 }
 
 // intGenOne generates only one value and is used when start equals stop.
-type intGenOne[T constraints.Integer] struct {
+type intGenOne[T Integer] struct {
 	done  bool
 	value T
 }

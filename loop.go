@@ -1,10 +1,6 @@
 // Package goloop tries to facilitate looping in Go.
 package goloop
 
-import (
-	"golang.org/x/exp/constraints"
-)
-
 // Repeat is intended to facilitate repeatedly doing something times times.
 // Repeat generates a sequence of ints and send them on the returned channel.
 // Values will be sent in order and are in the half-open interval [0,times).
@@ -54,7 +50,7 @@ func RepeatWithBreak(times int) <-chan I[int] {
 // Range does not panic and generates one value: start(stop).
 //
 // The returned channel's element is I, whose Break field can be called to terminate communication.
-func Range[T constraints.Integer](start, stop T, step ...T) <-chan I[T] {
+func Range[T Integer](start, stop T, step ...T) <-chan I[T] {
 	var gen generator[T]
 	if start == stop {
 		gen = newIntGenOne(start)
@@ -92,7 +88,7 @@ func Range[T constraints.Integer](start, stop T, step ...T) <-chan I[T] {
 // If not specified, step is 1 by default. If specified, step must be greater than 0,
 // otherwise RangeSlice will panic. There is one exception: if start equals stop,
 // RangeSlice does not panic and generates one value: start(stop).
-func RangeSlice[T constraints.Integer](start, stop T, step ...T) (s []T) {
+func RangeSlice[T Integer](start, stop T, step ...T) (s []T) {
 	var gen generator[T]
 	if start == stop {
 		gen = newIntGenOne(start)

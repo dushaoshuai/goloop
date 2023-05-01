@@ -90,6 +90,12 @@ func TestIntGen(t *testing.T) {
 		{10, 23, 4, []uint{10, 14, 18, 22}, false},
 		{10, 3, 4, []uint{10, 6}, false},
 	})
+	testIntGenHelper(t, []intGenTest[byte]{
+		{0, 0, 1, nil, true},
+		{1, 4, 0, nil, true},
+		{0, 23, 8, []byte{0, 8, 16}, false},
+		{15, 2, 3, []byte{15, 12, 9, 6, 3}, false},
+	})
 }
 
 func testIntGenOneHelper[T constraints.Integer](t *testing.T, value T) {
@@ -116,4 +122,6 @@ func TestIntGenOne(t *testing.T) {
 	testIntGenOneHelper(t, int(-399))
 	testIntGenOneHelper(t, int32(67))
 	testIntGenOneHelper(t, uint64(67))
+	testIntGenOneHelper(t, byte(255))
+	testIntGenOneHelper(t, rune(346))
 }
