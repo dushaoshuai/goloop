@@ -42,3 +42,16 @@ func ExampleRange() {
 	// 13
 	// 18
 }
+
+func ExampleRangeSlice() {
+	for i, n := range goloop.RangeSlice[uint8](250, 255) {
+		fmt.Println(i, n)
+	}
+
+	// Output:
+	// 0 250
+	// 1 251
+	// 2 252
+	// 3 253
+	// 4 254
+}
