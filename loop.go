@@ -47,7 +47,7 @@ func RepeatWithBreak(times int) <-chan I[int] {
 //
 // If not specified, step is 1 by default. If specified, step must be greater than 0,
 // otherwise Range will panic. There is one exception: if start equals stop,
-// Range does not panic and generates one value: start(stop).
+// instead of panicking, Range generates one value: start(stop).
 //
 // The returned channel's element is I, whose Break field can be called to terminate communication.
 func Range[T Integer](start, stop T, step ...T) <-chan I[T] {
@@ -87,7 +87,7 @@ func Range[T Integer](start, stop T, step ...T) <-chan I[T] {
 //
 // If not specified, step is 1 by default. If specified, step must be greater than 0,
 // otherwise RangeSlice will panic. There is one exception: if start equals stop,
-// RangeSlice does not panic and generates one value: start(stop).
+// instead of panicking, Range generates one value: start(stop).
 func RangeSlice[T Integer](start, stop T, step ...T) (s []T) {
 	var gen generator[T]
 	if start == stop {
