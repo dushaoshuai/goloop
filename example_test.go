@@ -54,4 +54,5 @@ func ExampleRangeSlice() {
 	// 2 252
 	// 3 253
 	// 4 254
+	// 5 255
 }
